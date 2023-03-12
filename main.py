@@ -40,10 +40,11 @@ class HighlightButton(Button):
 class Slots(Entity):
     def __init__(self, **kwargs):
         super().__init__()
-        self.model=copy(combine_parent.model)
+        # self.model=copy(combine_parent.model)
 
+        self.model = 'cube'
         self.scale = 0.5
-        self.always_on_top = True
+        # self.always_on_top = True
 
         self.x = kwargs.pop('xpos')
         self.y =  kwargs.pop('ypos')
@@ -57,9 +58,9 @@ class Slots(Entity):
 
     def update(self):
 
-        self.rotation_x += mouse.delta[1] * self.multiplier
-        self.rotation_y -= mouse.delta[0] * self.multiplier
-        self.rotation_z += mouse.delta[2] * self.multiplier
+        self.world_rotation_x += mouse.delta[1] * self.multiplier
+        self.world_rotation_y -= mouse.delta[0] * self.multiplier
+        self.world_rotation_z += mouse.delta[2] * self.multiplier
     def input(self, keys):
         if keys == "r":
             self.world_rotation_x = 0
@@ -93,21 +94,28 @@ class GameBoard(Entity):
         # self.parent=camera.ui
         print(self.parent)
     def update(self):
-        self.rotation_x += mouse.delta[1] * self.multiplier
-        self.rotation_y -= mouse.delta[0] * self.multiplier
-        self.rotation_z += mouse.delta[2] * self.multiplier
+        self.world_rotation_x += mouse.delta[1] * self.multiplier
+        self.world_rotation_y -= mouse.delta[0] * self.multiplier
+        self.world_rotation_z += mouse.delta[2] * self.multiplier
         self.hoverBoxPos = self.findHoverBox()
         self.highlightBox(self.allSlots, self.allSlotsPos)
     def input(self, keys):
         if keys == "r":
-            self.rotation_x = 0
-            self.rotation_y = 0
-            self.rotation_z = 0
-        if keys == "p":
-            self.rotation_x = 90
-            self.rotation_y = 90
-            self.rotation_z = 90
-
+            self.world_rotation_x = 0
+            self.world_rotation_y = 0
+            self.world_rotation_z = 0
+        elif keys == "p":
+            self.world_rotation_x = 90
+            self.world_rotation_y = 90
+            self.world_rotation_z = 90
+        if keys == "q":
+            self.world_rotation_x = 0
+            self.world_rotation_y = 0
+            self.world_rotation_z = 90
+        elif keys == "t":
+            self.world_rotation_x = 90
+            self.world_rotation_y = 0
+            self.world_rotation_z = 0
     def findHoverBox(self):
         if mouse.position:
             pos = mouse.position
@@ -127,9 +135,10 @@ class GameBoard(Entity):
 
                 if slotPos[i] == self.hoverBoxPos:
                     slots[i].color = color.black
-                    slots[i].scale = 0.6
+                    slots[i].always_on_top = True
                 else:
-                    slots[i].color = color.blue
+                    slots[i].color = color.random_color()
+                    # slots[i].always_on_top = False
         else:
             for i in range(len(slotPos)):
                     slots[i].color = color.blue
@@ -139,39 +148,36 @@ class GameBoard(Entity):
 if __name__ == '__main__':
     app = Ursina()
 
-    combine_parent = Entity(enabled=False)
-    for i in range(3):
-        dir = Vec3(0, 0, 0)
-        dir[i] = 1
+    # combine_parent = Entity(enabled=False)
+    # for i in range(2):
+    #     dir = Vec3(0, 0, 0)
+    #     dir[i] = 1
+    #
+    #     e = Entity(parent=combine_parent, model='cube', origin=(0,0,0), texture='white_cube')
+    #     e.look_at(dir, 'up')
+    #
+    #     e_flipped = Entity(parent=combine_parent, model='cube', origin=(0,0,0), texture='white_cube',)
+    #     e_flipped.look_at(-dir, 'up')
 
-        e = Entity(parent=combine_parent, model='plane', origin_y=-.5, texture='white_cube')
-        e.look_at(dir, 'up')
-
-        e_flipped = Entity(parent=combine_parent, model='plane', origin_y=-.5, texture='white_cube',)
-        e_flipped.look_at(-dir, 'up')
-
-    combine_parent.combine()
+    # combine_parent.combine()
     for x in range(3):
-        print(x)
-        print("==========")
         for y in range(3):
             for z in range(3):
-                e = Slots(xpos = (x-1) / .67, ypos = (y-1) / .67, zpos = (z-1) / .67 )
+                xPos = (x-1) / .67
+                yPos = (y - 1) / .67
+                zPos = (z-1) / .3
+                e = Slots(xpos = xPos , ypos = yPos, zpos = zPos)
 
-                print("x y and z: " + str(x) + ", " + str(y)  + ", " + str(z))
-                print("screen pos" + str(e.screen_position))
+                # print("x y and z: " + str(x) + ", " + str(y)  + ", " + str(z))
+                # print("screen pos" + str(e.screen_position))
                 pos = [x, y, z]
-                print("get pos" + str(e.getPos()))
+                # print("get pos" + str(e.getPos()))
                 slotPos.append(pos)
                 slots.append(e)
 
     print("===================================================================")
 
     gameBoard = GameBoard(allSlots=slots, allSlotsPos=slotPos)
-    # time.sleep(5)
-
-    # print(player.hoverBoxPos)
-
 
 
     print(slots)
