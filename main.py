@@ -5,12 +5,7 @@ initPos = Vec3(0,0,0)
 slots = []
 slotPos = []
 shouldHighlight = True
-
-# def addHighlightButton():
-#
-#     b = Button(position=(-0.5,-.4), scale=(.2, .1), text='zzz')
-#     b.on_mouse_enter = Func(setattr, b, 'text', 'Hovering')
-#     b.on_mouse_exit = Func(setattr, b, 'text', 'Not Hovering')
+turn = 1
 
 
 class HighlightButton(Button):
@@ -35,32 +30,26 @@ class HighlightButton(Button):
             self.text = "Stop Highlighting"
 
 
-
 # All potential slots for players to set their corresponding symbols
 class Slots(Entity):
     def __init__(self, **kwargs):
         super().__init__()
-        # self.model=copy(combine_parent.model)
-
         self.model = 'cube'
-        self.scale = 0.5
-        # self.always_on_top = True
+        self.scale = 2
+        self.collider = 'box'
 
         self.x = kwargs.pop('xpos')
         self.y =  kwargs.pop('ypos')
         self.z =  kwargs.pop('zpos')
+        self.always_on_top = False
+
         self.multiplier = 2
+        self.parent = kwargs.pop("gameObj")
 
-        self.color = color.random_color()
-
-        # self.parent=camera.ui
+        self.color = color.blue
+        self.texture = 'white_cube'
         self.getPos()
 
-    def update(self):
-
-        self.world_rotation_x += mouse.delta[1] * self.multiplier
-        self.world_rotation_y -= mouse.delta[0] * self.multiplier
-        self.world_rotation_z += mouse.delta[2] * self.multiplier
     def input(self, keys):
         if keys == "r":
             self.world_rotation_x = 0
@@ -79,25 +68,23 @@ class Slots(Entity):
             self.world_rotation_y = 0
             self.world_rotation_z = 0
 
+
 class GameBoard(Entity):
     def __init__(self, **kwargs):
         self.hoverBoxPos = None
         self.allSlots = kwargs.pop("allSlots")
         self.allSlotsPos = kwargs.pop("allSlotsPos")
+
         super().__init__()
         self.model="TicTacToeBase2.obj"
-        self.color = color.light_gray
+        self.color = color.azure
         self.scale = .4
         self.position = initPos
         self.multiplier = 2
+        self.texture = 'vignette'
 
-        # self.parent=camera.ui
-        print(self.parent)
     def update(self):
-        self.world_rotation_x += mouse.delta[1] * self.multiplier
-        self.world_rotation_y -= mouse.delta[0] * self.multiplier
-        self.world_rotation_z += mouse.delta[2] * self.multiplier
-        self.hoverBoxPos = self.findHoverBox()
+        self.hoverBoxPos = self.findHoverBox(self.allSlots, self.allSlotsPos)
         self.highlightBox(self.allSlots, self.allSlotsPos)
     def input(self, keys):
         if keys == "r":
@@ -116,77 +103,72 @@ class GameBoard(Entity):
             self.world_rotation_x = 90
             self.world_rotation_y = 0
             self.world_rotation_z = 0
-    def findHoverBox(self):
-        if mouse.position:
-            pos = mouse.position
-            xVal = [abs(-.149254 - pos[0]), abs(-pos[0]), abs(.149254 - pos[0])]
-            yVal = [abs(-.149254 - pos[1]), abs(-pos[1]), abs(.149254 - pos[1])]
-            zVal = [abs(-.149254 - pos[2]), abs(-pos[2]), abs(.149254 - pos[2])]
-            # print("xVal" + str(xVal))
-            # print("yVal" + str(yVal))
-            # print("zVal" + str(zVal))
-            indexes = [xVal.index(min(xVal)), yVal.index(min(yVal)), zVal.index(min(zVal))]
-            # print(indexes)
-            return indexes
-        else: return 0
+
+    def findHoverBox(self, slots, slotPos):
+        for i in range(len(slots)):
+            if slots[i].hovered:
+                return slotPos[i]
+
     def highlightBox(self, slots, slotPos):
         if self.hoverBoxPos and shouldHighlight:
             for i in range(len(slotPos)):
 
                 if slotPos[i] == self.hoverBoxPos:
-                    slots[i].color = color.black
+                    slots[i].color = color.hsv(198,.66, .95)
+
                     slots[i].always_on_top = True
                 else:
-                    slots[i].color = color.random_color()
-                    # slots[i].always_on_top = False
+                    # slots[i].color = color.rgb(0,1,0, 1)
+                    slots[i].color = color.clear
+                    slots[i].always_on_top = False
         else:
             for i in range(len(slotPos)):
-                    slots[i].color = color.blue
+                    # slots[i].color = color.rgb(0,1,0, 1)
+                    slots[i].color = color.clear
+                    slots[i].always_on_top = False
+
+
+def makeSlots():
+    for x in range(3):
+        for y in range(3):
+            for z in range(3):
+                xPos = (x-1) / .25
+                yPos = (y-1) / .25
+                zPos = (z-1) / .25
+                e = Slots(xpos = xPos , ypos = yPos, zpos = zPos, gameObj=gameBoard.model )
+
+                pos = [x, y, z]
+                e.shader = transition_shader
+                slotPos.append(pos)
+                slots.append(e)
+def settingsInit(**kwargs):
+    eCam = EditorCamera()
+    gameboard = kwargs.pop("gameboard")
+    Cursor(texture='cursor', scale=.1)
+
+    eCam.rotateMouse = kwargs.pop("mouseButton")
+
+
+    gameboard.shader = basic_lighting_shader
+    camera.shader = basic_lighting_shader
+    window.color = color.hsv(32, .68, .97)  # hsv color
+
+    mouse.visible = False
+    window.exit_button.visible = False
+    window.fps_counter.enabled = False
+
 
 
 # Code to run on initialization of app
 if __name__ == '__main__':
     app = Ursina()
-
-    # combine_parent = Entity(enabled=False)
-    # for i in range(2):
-    #     dir = Vec3(0, 0, 0)
-    #     dir[i] = 1
-    #
-    #     e = Entity(parent=combine_parent, model='cube', origin=(0,0,0), texture='white_cube')
-    #     e.look_at(dir, 'up')
-    #
-    #     e_flipped = Entity(parent=combine_parent, model='cube', origin=(0,0,0), texture='white_cube',)
-    #     e_flipped.look_at(-dir, 'up')
-
-    # combine_parent.combine()
-    for x in range(3):
-        for y in range(3):
-            for z in range(3):
-                xPos = (x-1) / .67
-                yPos = (y - 1) / .67
-                zPos = (z-1) / .3
-                e = Slots(xpos = xPos , ypos = yPos, zpos = zPos)
-
-                # print("x y and z: " + str(x) + ", " + str(y)  + ", " + str(z))
-                # print("screen pos" + str(e.screen_position))
-                pos = [x, y, z]
-                # print("get pos" + str(e.getPos()))
-                slotPos.append(pos)
-                slots.append(e)
-
-    print("===================================================================")
-
+    from ursina.shaders import *
     gameBoard = GameBoard(allSlots=slots, allSlotsPos=slotPos)
+    HighlightButton = HighlightButton(pos=(-0.8, -.4), scale=(0.3, 0.1))
 
-
-    print(slots)
-    Cursor(texture='cursor', scale=.1)
-    mouse.visible = False
-    window.exit_button.visible = False
-    window.fps_counter.enabled = False
-
-    HighlightButton = HighlightButton(pos=(-0.8,-.4), scale=(0.3, 0.1))
-
-
+    settingsInit(
+        gameboard=gameBoard,
+        mouseButton="left mouse"
+    )
+    makeSlots()
     app.run()
