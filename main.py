@@ -29,7 +29,6 @@ class HighlightButton(Button):
             shouldHighlight = True
             self.text = "Stop Highlighting"
 
-
 # All potential slots for players to set their corresponding symbols
 class Slots(Entity):
     def __init__(self, **kwargs):
@@ -69,20 +68,21 @@ class Slots(Entity):
             self.world_rotation_z = 0
 
 
+
 class GameBoard(Entity):
     def __init__(self, **kwargs):
         self.hoverBoxPos = None
         self.allSlots = kwargs.pop("allSlots")
         self.allSlotsPos = kwargs.pop("allSlotsPos")
+        self.hoverBoxIndex = None
 
         super().__init__()
-        self.model="TicTacToeBase2.obj"
+        self.model="assets/background/TicTacToeBase.obj"
         self.color = color.azure
         self.scale = .4
         self.position = initPos
         self.multiplier = 2
         self.texture = 'vignette'
-
     def update(self):
         self.hoverBoxPos = self.findHoverBox(self.allSlots, self.allSlotsPos)
         self.highlightBox(self.allSlots, self.allSlotsPos)
@@ -103,12 +103,11 @@ class GameBoard(Entity):
             self.world_rotation_x = 90
             self.world_rotation_y = 0
             self.world_rotation_z = 0
-
     def findHoverBox(self, slots, slotPos):
         for i in range(len(slots)):
             if slots[i].hovered:
+                self.hoverBoxIndex = i
                 return slotPos[i]
-
     def highlightBox(self, slots, slotPos):
         if self.hoverBoxPos and shouldHighlight:
             for i in range(len(slotPos)):
@@ -126,6 +125,33 @@ class GameBoard(Entity):
                     # slots[i].color = color.rgb(0,1,0, 1)
                     slots[i].color = color.clear
                     slots[i].always_on_top = False
+
+
+class playerSymbol(Entity):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.playerNum = kwargs.pop("player")
+        if self.playerNum == 1:
+            self.model = 'assets/player symbols/diamond2.obj'
+            self.color = color.rgb(0.31, .76, 0.96, 1)
+            self.scale = .2
+        elif self.playerNum == 2:
+            self.model = 'sphere'
+            self.color = color.hsv(309, .76, 1)
+            self.scale = 3
+        elif self.playerNum == 3:
+            self.model = "cube"
+            self.color = color.hsv(138, .74, .84)
+            self.scale = 2.5
+        self.rotation_x = -180
+        self.shader = colored_lights_shader
+
+        self.parent = gameBoard
+        self.multiplier = 2
+        # self.texture = 'vignette'
+    def input(self, keys):
+        if keys == 'left mouse down':
+            self.position = slots[gameBoard.hoverBoxIndex].position
 
 
 def makeSlots():
@@ -157,8 +183,6 @@ def settingsInit(**kwargs):
     window.exit_button.visible = False
     window.fps_counter.enabled = False
 
-
-
 # Code to run on initialization of app
 if __name__ == '__main__':
     app = Ursina()
@@ -170,5 +194,8 @@ if __name__ == '__main__':
         gameboard=gameBoard,
         mouseButton="left mouse"
     )
+
+    playerSymbol(player=1)
+
     makeSlots()
     app.run()
