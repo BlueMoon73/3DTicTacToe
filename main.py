@@ -4,37 +4,61 @@ from ursina import *
 initPos = Vec3(0,0,0)
 slots = []
 slotPos = []
-shouldHighlight = True
-turn = 1
+slotsOccupied = []
+currentSymbols = []
+turn = 0
 
 
-class HighlightButton(Button):
+shouldTakeover = False
+takeovers = [2, 3, 3]
+
+class ToggleButton(Button):
     def __init__(self, **kwargs):
         super().__init__()
         self.position = kwargs.pop("pos")
         self.scale = kwargs.pop("scale")
+        self.startValue = kwargs.pop("startVal")
+
+
+
         self.color = color.olive
-        self.on_click = self.onClick
-        self.text = "Stop highlighting"
+
+        self.defaultText = kwargs.pop("defaultText")
+        self.clickText = kwargs.pop("clickText")
+        self.text = self.defaultText
         self.highlight_color = self.color.tint(.2)
         self.highlight_scale = 1.3
-        self.pressed_color = self.color.tint(.3)
+        self.pressed_color = self.color.tint(0.3)
         self.pressed_scale = 1.3
+
+        self.on_click = self.onClick
+        self.value = self.startValue
     def onClick(self):
-        global shouldHighlight
-        if shouldHighlight:
-            shouldHighlight = False
-            self.text = "Start highlighting"
+        if not self.startValue:
+            if not self.value:
+                self.value = not self.startValue
+                self.text = self.clickText
+                self.color = color.blue
+            else:
+                self.value = self.startValue
+                self.text = self.defaultText
+                self.color = color.olive
         else:
-            shouldHighlight = True
-            self.text = "Stop Highlighting"
+            if self.value:
+                self.value = not self.startValue
+                self.text = self.clickText
+                self.color = color.blue
+            else:
+                self.value = self.startValue
+                self.text = self.defaultText
+                self.color = color.olive
 
 # All potential slots for players to set their corresponding symbols
 class Slots(Entity):
     def __init__(self, **kwargs):
         super().__init__()
         self.model = 'sphere'
-        self.scale = 2
+        self.scale = 2.6
         self.collider = 'sphere'
 
         self.x = kwargs.pop('xpos')
@@ -83,6 +107,7 @@ class GameBoard(Entity):
         self.position = initPos
         self.multiplier = 2
         self.texture = 'vignette'
+        self.eternal = True
     def update(self):
         self.hoverBoxPos = self.findHoverBox(self.allSlots, self.allSlotsPos)
         self.highlightBox(self.allSlots, self.allSlotsPos)
@@ -104,12 +129,17 @@ class GameBoard(Entity):
             self.world_rotation_y = 0
             self.world_rotation_z = 0
     def findHoverBox(self, slots, slotPos):
-        for i in range(len(slots)):
-            if slots[i].hovered:
-                self.hoverBoxIndex = i
-                return slotPos[i]
+        if mouse.hovered_entity:
+            for i in range(len(slots)):
+                if slots[i].hovered:
+                    self.hoverBoxIndex = i
+                    return slotPos[i]
+        else:
+            self.hoverBoxIndex = 30
+            return 27
+            # else:
     def highlightBox(self, slots, slotPos):
-        if self.hoverBoxPos and shouldHighlight:
+        if self.hoverBoxPos and highlightButton.value:
             for i in range(len(slotPos)):
 
                 if slotPos[i] == self.hoverBoxPos:
@@ -131,24 +161,62 @@ class GameBoard(Entity):
                     slots[i].always_on_top = False
 
 
-class player(Entity):
+class Player(Entity):
     def __init__(self, **kwargs):
         super().__init__()
         self.turnNum = 1
+        self.playerOneTakeovers = Text(text="Player 1 Takeovers: " + str(takeovers[0]), wordwrap=30, x=0.5, y=.3)
+        self.playerTwoTakeovers = Text(text="Player 2 Takeovers: " + str(takeovers[1]), wordwrap=30, x=0.5, y=.2)
+        self.playerThreeTakeovers = Text(text="Player 3 Takeovers: " + str(takeovers[2]), wordwrap=30, x=0.5, y=0.1)
+        self.playerTurn = Text(text="Player # " + str(self.turnNum), wordwrap=30, x=0.5, y=0)
+        self.errorMsg = Text(text=" ", wordwrap=30, x=0.5, y=-0.1, scale=1.4, color=color.red)
 
         # self.texture = 'vignette'
     def input(self, keys):
-
         if keys == 'left mouse down':
-            playerSymbol(player=self.turnNum, position=slots[gameBoard.hoverBoxIndex].position)
-            self.turnNum += 1
-            if self.turnNum > 3:
-                self.turnNum = self.turnNum % 3
+            if gameBoard.hoverBoxIndex < 27:
+                hoverIndex = gameBoard.hoverBoxIndex
+                # print(takeOverButton.value)
+                if not slotsOccupied[hoverIndex] and not takeOverButton.value:
+                    self.placePlayerSymbol(hoverIndex)
+                    print(hoverIndex)
+                elif slotsOccupied[hoverIndex] and takeOverButton.value and takeovers[self.turnNum - 1] > 0:
+                    takeovers[self.turnNum - 1] -= 1
+                    self.replacePlayerSymbol(hoverIndex)
+            else:
+                self.errorMsg.text="Please select a valid place to move"
+
+    def placePlayerSymbol(self, index):
+        p = PlayerSymbol(player=self.turnNum, position=slots[index].position)
+        slotsOccupied[index] = True
+        currentSymbols[index] = p
+        self.turnNum += 1
+        if self.turnNum > 3:
+            self.turnNum = self.turnNum % 3
+    def replacePlayerSymbol(self, index):
+        p = PlayerSymbol(player=self.turnNum, position=slots[index].position)
+        slotsOccupied[index] = True
+        print(currentSymbols[index].playerNum)
+        destroy(currentSymbols[index])
+        currentSymbols[index] = p
+        print(currentSymbols[index].playerNum)
+
+        print("removed")
+        # currentSymbols[index] = p
+
+        self.turnNum += 1
+        if self.turnNum > 3:
+            self.turnNum = self.turnNum % 3
+    def update(self):
+        self.playerOneTakeovers.text = "Player 1 Takeovers: " + str(takeovers[0])
+        self.playerTwoTakeovers.text = "Player 2 Takeovers: " + str(takeovers[1])
+        self.playerThreeTakeovers.text = "Player 3 Takeovers: " + str(takeovers[2])
+        self.playerTurn.text = "Player # " + str(self.turnNum)
 
 
 
 
-class playerSymbol(Entity):
+class PlayerSymbol(Entity):
     def __init__(self, **kwargs):
         super().__init__()
         self.playerNum = kwargs.pop("player")
@@ -182,7 +250,10 @@ def makeSlots():
 
                 pos = [x, y, z]
                 slotPos.append(pos)
+                slotsOccupied.append(False)
+                currentSymbols.append(None)
                 slots.append(e)
+
 def settingsInit(**kwargs):
     eCam = EditorCamera()
     gameboard = kwargs.pop("gameboard")
@@ -197,19 +268,24 @@ def settingsInit(**kwargs):
     window.exit_button.visible = False
     window.fps_counter.enabled = False
 
+
+
 # Code to run on initialization of app
 if __name__ == '__main__':
     app = Ursina()
     from ursina.shaders import *
     gameBoard = GameBoard(allSlots=slots, allSlotsPos=slotPos)
-    HighlightButton = HighlightButton(pos=(-0.8, -.4), scale=(0.3, 0.1))
+    highlightButton = ToggleButton(startVal=True, pos=(-0.8, -.4), scale=(0.3, 0.1), defaultText="Stop highlighting!", clickText="Start Highlighting!")
+    takeOverButton = ToggleButton(startVal=False, pos=(-0.4, -.4), scale=(0.3, 0.1), defaultText="Click to  enable takeover mode!", clickText="Click to  disable takeover mode!")
 
     settingsInit(
         gameboard=gameBoard,
         mouseButton="left mouse"
     )
 
-    player(player=turn)
+
+
+    Player(player=turn)
     print(turn)
 
     makeSlots()
