@@ -33,9 +33,9 @@ class HighlightButton(Button):
 class Slots(Entity):
     def __init__(self, **kwargs):
         super().__init__()
-        self.model = 'cube'
+        self.model = 'sphere'
         self.scale = 2
-        self.collider = 'box'
+        self.collider = 'sphere'
 
         self.x = kwargs.pop('xpos')
         self.y =  kwargs.pop('ypos')
@@ -44,9 +44,8 @@ class Slots(Entity):
 
         self.multiplier = 2
         self.parent = kwargs.pop("gameObj")
-
-        self.color = color.blue
-        self.texture = 'white_cube'
+        self.shader = transition_shader
+        self.texture = 'horizontal_gradient'
         self.getPos()
 
     def input(self, keys):
@@ -80,6 +79,7 @@ class GameBoard(Entity):
         self.model="assets/background/TicTacToeBase.obj"
         self.color = color.azure
         self.scale = .4
+        self.shader = basic_lighting_shader
         self.position = initPos
         self.multiplier = 2
         self.texture = 'vignette'
@@ -113,7 +113,11 @@ class GameBoard(Entity):
             for i in range(len(slotPos)):
 
                 if slotPos[i] == self.hoverBoxPos:
-                    slots[i].color = color.hsv(198,.66, .95)
+                    # slots[i].color = color.hsv(198,.66, .95)
+                    # slots[i].color = color.rgb(82/255, 194/255, 242/255, .7)
+                    # slots[i].color = color.rgb(204/255, 71/255, 155/255, .7)
+                    slots[i].color = color.white33
+
 
                     slots[i].always_on_top = True
                 else:
@@ -127,33 +131,46 @@ class GameBoard(Entity):
                     slots[i].always_on_top = False
 
 
+class player(Entity):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.turnNum = 1
+
+        # self.texture = 'vignette'
+    def input(self, keys):
+
+        if keys == 'left mouse down':
+            playerSymbol(player=self.turnNum, position=slots[gameBoard.hoverBoxIndex].position)
+            self.turnNum += 1
+            if self.turnNum > 3:
+                self.turnNum = self.turnNum % 3
+
+
+
+
 class playerSymbol(Entity):
     def __init__(self, **kwargs):
         super().__init__()
         self.playerNum = kwargs.pop("player")
         if self.playerNum == 1:
-            self.model = 'assets/player symbols/diamond2.obj'
+            self.model = 'assets/player symbols/diamond.obj'
             self.color = color.rgb(0.31, .76, 0.96, 1)
             self.scale = .2
         elif self.playerNum == 2:
-            self.model = 'sphere'
+            self.model = 'assets/player symbols/pyramid9.obj'
+            self.rotation_z = 180
             self.color = color.hsv(309, .76, 1)
-            self.scale = 3
+            self.scale = .25
         elif self.playerNum == 3:
             self.model = "cube"
             self.color = color.hsv(138, .74, .84)
             self.scale = 2.5
         self.rotation_x = -180
         self.shader = colored_lights_shader
-
+        self.position = kwargs.pop("position")
         self.parent = gameBoard
         self.multiplier = 2
         # self.texture = 'vignette'
-    def input(self, keys):
-        if keys == 'left mouse down':
-            self.position = slots[gameBoard.hoverBoxIndex].position
-
-
 def makeSlots():
     for x in range(3):
         for y in range(3):
@@ -164,7 +181,6 @@ def makeSlots():
                 e = Slots(xpos = xPos , ypos = yPos, zpos = zPos, gameObj=gameBoard.model )
 
                 pos = [x, y, z]
-                e.shader = transition_shader
                 slotPos.append(pos)
                 slots.append(e)
 def settingsInit(**kwargs):
@@ -174,8 +190,6 @@ def settingsInit(**kwargs):
 
     eCam.rotateMouse = kwargs.pop("mouseButton")
 
-
-    gameboard.shader = basic_lighting_shader
     camera.shader = basic_lighting_shader
     window.color = color.hsv(32, .68, .97)  # hsv color
 
@@ -195,7 +209,8 @@ if __name__ == '__main__':
         mouseButton="left mouse"
     )
 
-    playerSymbol(player=1)
+    player(player=turn)
+    print(turn)
 
     makeSlots()
     app.run()
