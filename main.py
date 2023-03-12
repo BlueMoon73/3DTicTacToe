@@ -1,42 +1,54 @@
-# from ursina import *
-#
-# app = Ursina()
-#
-#
-# def start():
-#     player = Entity(model = "cube", color=color.blue, scale_y=2)
-#     return player
-# def updateFunc(item):
-#     item.x += held_keys["d"] * 0.1
-#
-# player = start()
-# def update():
-#     updateFunc(player)
-import PIL
 from ursina import *
 
-def addPlayerSymbol():
-    b = Button(position=(-0.5,-.4), scale=(.2, .1), text='zzz')
-    b.on_mouse_enter = Func(setattr, b, 'text', 'Hovering')
-    b.on_mouse_exit = Func(setattr, b, 'text', 'Not Hovering')
-
+# Global Variables to be used
 initPos = Vec3(0,0,0)
+slots = []
+slotPos = []
+shouldHighlight = True
 
-
+# def addHighlightButton():
 #
+#     b = Button(position=(-0.5,-.4), scale=(.2, .1), text='zzz')
+#     b.on_mouse_enter = Func(setattr, b, 'text', 'Hovering')
+#     b.on_mouse_exit = Func(setattr, b, 'text', 'Not Hovering')
+
+
+class HighlightButton(Button):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.position = kwargs.pop("pos")
+        self.scale = kwargs.pop("scale")
+        self.color = color.olive
+        self.on_click = self.onClick
+        self.text = "Stop highlighting"
+        self.highlight_color = self.color.tint(.2)
+        self.highlight_scale = 1.3
+        self.pressed_color = self.color.tint(.3)
+        self.pressed_scale = 1.3
+    def onClick(self):
+        global shouldHighlight
+        if shouldHighlight:
+            shouldHighlight = False
+            self.text = "Start highlighting"
+        else:
+            shouldHighlight = True
+            self.text = "Stop Highlighting"
+
+
+
+# All potential slots for players to set their corresponding symbols
 class Slots(Entity):
     def __init__(self, **kwargs):
         super().__init__()
         self.model=copy(combine_parent.model)
-        # print(color)
-        # self.scale = random.uniform(0.2, 0.7)
+
         self.scale = 0.5
         self.always_on_top = True
-        # self.position =Vec3(500,0,0)
-        # self.origin = (initPos)
+
         self.x = kwargs.pop('xpos')
         self.y =  kwargs.pop('ypos')
         self.z =  kwargs.pop('zpos')
+        self.multiplier = 2
 
         self.color = color.random_color()
 
@@ -44,9 +56,10 @@ class Slots(Entity):
         self.getPos()
 
     def update(self):
-        self.world_rotation_x += mouse.delta[1]
-        self.world_rotation_y -= mouse.delta[0]
-        self.world_rotation_z += mouse.delta[2]
+
+        self.rotation_x += mouse.delta[1] * self.multiplier
+        self.rotation_y -= mouse.delta[0] * self.multiplier
+        self.rotation_z += mouse.delta[2] * self.multiplier
     def input(self, keys):
         if keys == "r":
             self.world_rotation_x = 0
@@ -65,10 +78,7 @@ class Slots(Entity):
             self.world_rotation_y = 0
             self.world_rotation_z = 0
 
-
-
-
-class Player(Entity):
+class GameBoard(Entity):
     def __init__(self, **kwargs):
         self.hoverBoxPos = None
         self.allSlots = kwargs.pop("allSlots")
@@ -78,13 +88,14 @@ class Player(Entity):
         self.color = color.light_gray
         self.scale = .4
         self.position = initPos
+        self.multiplier = 2
 
         # self.parent=camera.ui
         print(self.parent)
     def update(self):
-        self.rotation_x += mouse.delta[1]
-        self.rotation_y -= mouse.delta[0]
-        self.rotation_z += mouse.delta[2]
+        self.rotation_x += mouse.delta[1] * self.multiplier
+        self.rotation_y -= mouse.delta[0] * self.multiplier
+        self.rotation_z += mouse.delta[2] * self.multiplier
         self.hoverBoxPos = self.findHoverBox()
         self.highlightBox(self.allSlots, self.allSlotsPos)
     def input(self, keys):
@@ -111,7 +122,7 @@ class Player(Entity):
             return indexes
         else: return 0
     def highlightBox(self, slots, slotPos):
-        if self.hoverBoxPos:
+        if self.hoverBoxPos and shouldHighlight:
             for i in range(len(slotPos)):
 
                 if slotPos[i] == self.hoverBoxPos:
@@ -119,28 +130,12 @@ class Player(Entity):
                     slots[i].scale = 0.6
                 else:
                     slots[i].color = color.blue
-                    # print(i)
-                    # b = Slots(xpos=self.hoverBoxPos[0], ypos=self.hoverBoxPos[1], zpos=self.hoverBoxPos[2])
-                    # b.scale= 0.6
-                    # b.color = color.black
-                    # for x in range(len(slots)):
-                    #     slot
-
-                    # print(slots[i].color)
+        else:
+            for i in range(len(slotPos)):
+                    slots[i].color = color.blue
 
 
-        # if mouse.hovered_entity:
-        #     print(mouse.hovered_entity)
-        # print(mouse.position)
-        # print(slots)
-    # def update(self):
-        # print(mouse.velocity)
-
-
-
-
-slots = []
-slotPos = []
+# Code to run on initialization of app
 if __name__ == '__main__':
     app = Ursina()
 
@@ -161,9 +156,7 @@ if __name__ == '__main__':
         print("==========")
         for y in range(3):
             for z in range(3):
-                e = Slots(xpos = (x-1) / .67, ypos = (y-1) / .67, zpos = (z-1) / .67  )
-                if z == 2:
-                    e.color = color.red
+                e = Slots(xpos = (x-1) / .67, ypos = (y-1) / .67, zpos = (z-1) / .67 )
 
                 print("x y and z: " + str(x) + ", " + str(y)  + ", " + str(z))
                 print("screen pos" + str(e.screen_position))
@@ -174,7 +167,7 @@ if __name__ == '__main__':
 
     print("===================================================================")
 
-    player = Player(allSlots=slots, allSlotsPos=slotPos)
+    gameBoard = GameBoard(allSlots=slots, allSlotsPos=slotPos)
     # time.sleep(5)
 
     # print(player.hoverBoxPos)
@@ -187,10 +180,7 @@ if __name__ == '__main__':
     window.exit_button.visible = False
     window.fps_counter.enabled = False
 
-    # player = Entity(parent=camera.ui,  model = "TicTacToeBase.obj", color=color.light_gray, scale=.04, position=initPos)
-    # bg = Entity(parent=camera.ui, model='quad', texture=, scale_x=camera.aspect_ratio, z=1)
-
-    addPlayerSymbol()
+    HighlightButton = HighlightButton(pos=(-0.8,-.4), scale=(0.3, 0.1))
 
 
     app.run()
