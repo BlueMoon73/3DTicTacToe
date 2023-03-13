@@ -1,5 +1,6 @@
 from ursina import Entity, color, mouse
 from ursina.shaders import basic_lighting_shader
+import config
 
 
 # class for the main gameboard
@@ -19,6 +20,7 @@ class GameBoard(Entity):
         self.multiplier = 2
         self.texture = 'vignette'
         self.eternal = True
+        self.highlightButton = kwargs.pop("highlightButton")
 
     def update(self):
         self.hoverBoxPos = self.findHoverBox(self.allSlots, self.allSlotsPos)
@@ -38,24 +40,20 @@ class GameBoard(Entity):
 
     # "highlight" the box that is being hovered over to indicate it is being hovered over
     def highlightBox(self, slots, slotPos):
-        if self.hoverBoxPos and highlightButton.value:
+        if self.hoverBoxPos and self.highlightButton.value:
             for i in range(len(slotPos)):
 
                 if slotPos[i] == self.hoverBoxPos:
-                    # slots[i].color = color.hsv(198,.66, .95)
-                    # slots[i].color = color.rgb(82/255, 194/255, 242/255, .7)
-                    # slots[i].color = color.rgb(204/255, 71/255, 155/255, .7)
+
                     slots[i].color = color.white33
 
                     slots[i].always_on_top = True
                 else:
-                    # slots[i].color = color.rgb(0,1,0, 1)
-                    # slots[i].color = color.white10
+
                     slots[i].color = color.clear
                     slots[i].always_on_top = False
         else:
             for i in range(len(slotPos)):
-                # slots[i].color = color.rgb(0,1,0, 1)
                 slots[i].color = color.clear
-                # slots[i].color = color.rgb(.1,.1,.1,.01)
+
                 slots[i].always_on_top = False
