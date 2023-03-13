@@ -4,6 +4,8 @@ from ursina import Button, Entity, Vec3, color, mouse, destroy, Cursor, camera, 
 # normals_shader,
 from ursina.shaders import *
 
+from GameBoard import GameBoard
+
 # Global Variables to be used
 initPos = Vec3(0, 0, 0)
 slots = []
@@ -77,65 +79,6 @@ class Slots(Entity):
         # self.texture = 'horizontal_gradient'
 
 
-# class for the main gameboard
-class GameBoard(Entity):
-    def __init__(self, **kwargs):
-        self.hoverBoxPos = None
-        self.allSlots = kwargs.pop("allSlots")
-        self.allSlotsPos = kwargs.pop("allSlotsPos")
-        self.hoverBoxIndex = None
-
-        super().__init__()
-        self.model = "assets/background/TicTacToeBase.obj"
-        self.color = color.azure
-        self.scale = .4
-        self.shader = basic_lighting_shader
-        self.position = initPos
-        self.multiplier = 2
-        self.texture = 'vignette'
-        self.eternal = True
-
-    def update(self):
-        self.hoverBoxPos = self.findHoverBox(self.allSlots, self.allSlotsPos)
-        self.highlightBox(self.allSlots, self.allSlotsPos)
-
-    # finding the box that is being hovered over, if any
-    def findHoverBox(self, slots, slotPos):
-        if mouse.hovered_entity:
-            for i in range(len(slots)):
-                if slots[i].hovered:
-                    self.hoverBoxIndex = i
-                    return slotPos[i]
-        else:
-            self.hoverBoxIndex = 30
-            return 27
-            # else:
-
-    # "highlight" the box that is being hovered over to indicate it is being hovered over
-    def highlightBox(self, slots, slotPos):
-        if self.hoverBoxPos and highlightButton.value:
-            for i in range(len(slotPos)):
-
-                if slotPos[i] == self.hoverBoxPos:
-                    # slots[i].color = color.hsv(198,.66, .95)
-                    # slots[i].color = color.rgb(82/255, 194/255, 242/255, .7)
-                    # slots[i].color = color.rgb(204/255, 71/255, 155/255, .7)
-                    slots[i].color = color.white33
-
-                    slots[i].always_on_top = True
-                else:
-                    # slots[i].color = color.rgb(0,1,0, 1)
-                    # slots[i].color = color.white10
-                    slots[i].color = color.clear
-                    slots[i].always_on_top = False
-        else:
-            for i in range(len(slotPos)):
-                # slots[i].color = color.rgb(0,1,0, 1)
-                slots[i].color = color.clear
-                # slots[i].color = color.rgb(.1,.1,.1,.01)
-                slots[i].always_on_top = False
-
-
 # class for the player, not a physical entity
 # just to manage all players at once
 class Player(Entity):
@@ -197,7 +140,19 @@ class Player(Entity):
             self.turnNum = self.turnNum % 3
 
     def checkForHorizontalWin(self):
-        print(horizontalCombos)
+        # print(horizontalCombos)
+        for row in range(len(horizontalCombos)):
+            # if currentSymbols[self.findSymbolIndexWithPos(horizontalCombos[row][0])].playerNum and currentSymbols[self.findSymbolIndexWithPos(horizontalCombos[row][1])].playerNum and currentSymbols[self.findSymbolIndexWithPos(horizontalCombos[row][2])].playerNum:
+            # if currentSymbols[self.findSymbolIndexWithPos(horizontalCombos[row][0])].playerNum:
+            # print(currentSymbols[self.findSymbolIndexWithPos(horizontalCombos[row][0])].playerNum)
+            # print("wtf")
+            # print(horizontalCombos[row][0])
+            # pos = horizontalCombos[row][0]
+            #
+            # print(self.findSymbolIndexWithPos(horizontalCombos[row][0]))
+                print("someone has won")
+
+                # i = self.findSymbolIndexWithPos()
 
         # pass
 
@@ -207,6 +162,10 @@ class Player(Entity):
     def checkForCornerToCornerWin(self):
         pass
 
+    def findSymbolIndexWithPos(self, pos):
+        for i in range(len(slotPos)):
+            if slotPos[i] == pos:
+                return i
     def update(self):
         self.playerOneTakeovers.text = "Player 1 Takeovers: " + str(takeovers[0])
         self.playerTwoTakeovers.text = "Player 2 Takeovers: " + str(takeovers[1])
@@ -252,11 +211,11 @@ def allPossibleHorziontalCombos():
     # HORIZONTAL COMBOS
     for x in range(3):
         for y in range(3):
-            slot1 = (x, y, 0)
-            slot2 = (x, y, 1)
-            slot3 = (x, y, 2)
+            slot1 = [x, y, 0]
+            slot2 = [x, y, 1]
+            slot3 = [x, y, 2]
 
-            row = (slot1, slot2, slot3)
+            row = [slot1, slot2, slot3]
 
             horizontalCombos.append(row)
 def allPossibleDiagnolMultilayered():
@@ -333,7 +292,7 @@ def makeSlots():
 # initial settings to be declared
 def settingsInit(**kwargs):
     eCam = EditorCamera()
-    gameboard = kwargs.pop("gameboard")
+    # gameboard = gameBoard
     Cursor(texture='cursor', scale=.1)
     makeWinningCombos()
 
@@ -354,12 +313,13 @@ def settingsInit(**kwargs):
 # Code to run on initialization of app
 if __name__ == '__main__':
     app = Ursina()
-    gameBoard = GameBoard(allSlots=slots, allSlotsPos=slotPos)
     highlightButton = ToggleButton(startVal=True, pos=(-0.8, -.4), scale=(0.3, 0.1), defaultText="Stop highlighting!",
                                    clickText="Start Highlighting!")
     takeOverButton = ToggleButton(startVal=False, pos=(-0.3, -.4), scale=(0.4, 0.1),
                                   defaultText="Click to  enable takeover mode!",
                                   clickText="Click to  disable takeover mode!")
+
+    gameBoard = GameBoard(allSlots=slots, allSlotsPos=slotPos, highlightButton=highlightButton)
 
     settingsInit(
         gameboard=gameBoard,
