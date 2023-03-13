@@ -1,5 +1,4 @@
 from ursina import Entity, color, mouse
-from ursina.shaders import basic_lighting_shader
 import config
 
 
@@ -12,13 +11,12 @@ class GameBoard(Entity):
         self.hoverBoxIndex = None
 
         super().__init__()
-        self.model = "assets/background/TicTacToeBase.obj"
-        self.color = color.azure
-        self.scale = .4
-        self.shader = basic_lighting_shader
-        self.position = (0, 0, 0)
-        self.multiplier = 2
-        self.texture = 'vignette'
+        self.model = config.gameboardModel
+        self.color = color.hex(config.gameboardColor)
+        self.scale = config.gameboardScale
+        self.shader = config.gameboardShader
+        self.position = config.initPos
+        self.texture = config.gameboardTexture
         self.eternal = True
         self.highlightButton = kwargs.pop("highlightButton")
 
@@ -35,8 +33,7 @@ class GameBoard(Entity):
                     return slotPos[i]
         else:
             self.hoverBoxIndex = 30
-            return 27
-            # else:
+            return 30
 
     # "highlight" the box that is being hovered over to indicate it is being hovered over
     def highlightBox(self, slots, slotPos):

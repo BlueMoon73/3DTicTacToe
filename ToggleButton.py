@@ -1,4 +1,7 @@
-from ursina import Button, color
+from ursina import Button
+
+import config
+
 
 # Button class for all buttons that are toggle something on or off
 
@@ -9,15 +12,17 @@ class ToggleButton(Button):
         self.scale = kwargs.pop("scale")
         self.startValue = kwargs.pop("startVal")
 
-        self.color = color.olive
+        self.defaultColor = config.toggleButtonDefaultColor
+        self.clickedColor = config.toggleButtonClickedColor
+        self.color = self.defaultColor
 
         self.defaultText = kwargs.pop("defaultText")
         self.clickText = kwargs.pop("clickText")
         self.text = self.defaultText
-        self.highlight_color = self.color.tint(.2)
-        self.highlight_scale = 1.3
-        self.pressed_color = self.color.tint(0.3)
-        self.pressed_scale = 1.3
+        self.highlight_color = self.color.tint(config.toggleButtonHighlightTint)
+        self.highlight_scale = config.toggleButtonHighlightScale
+        self.pressed_color = self.color.tint(config.toggleButtonPressedTint)
+        self.pressed_scale = config.toggleButtonPressedScale
 
         self.on_click = self.onClick
         self.value = self.startValue
@@ -27,18 +32,18 @@ class ToggleButton(Button):
             if not self.value:
                 self.value = not self.startValue
                 self.text = self.clickText
-                self.color = color.blue
+                self.color = self.clickedColor
             else:
                 self.value = self.startValue
                 self.text = self.defaultText
-                self.color = color.olive
+                self.color = self.defaultColor
         else:
             if self.value:
                 self.value = not self.startValue
                 self.text = self.clickText
-                self.color = color.blue
+                self.color = self.clickedColor
             else:
                 self.value = self.startValue
                 self.text = self.defaultText
-                self.color = color.olive
+                self.color = self.defaultColor
 

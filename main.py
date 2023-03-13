@@ -9,8 +9,6 @@ import GameInit
 if __name__ == '__main__':
     app = Ursina()
 
-
-
     takeOverButton = ToggleButton(startVal=False, pos=(-0.3, -.4), scale=(0.4, 0.1),
                                   defaultText="Click to  enable takeover mode!",
                                   clickText="Click to  disable takeover mode!")
@@ -19,9 +17,9 @@ if __name__ == '__main__':
                                    clickText="Start Highlighting!")
 
     gameBoard = GameBoard(allSlots=config.slots, allSlotsPos=config.slotPos, highlightButton=highlightButton)
-    GameInit.settingsInit(gameboard=gameBoard,mouseButton="left mouse")
+    GameInit.settingsInit(gameboard=gameBoard,mouseButton="left mouse button")
     Player(player=config.turn, gameboard=gameBoard, takeoverButton=takeOverButton)
-    print(config.turn)
+
 
     GameInit.makeSlots(gameBoard)
     app.run()

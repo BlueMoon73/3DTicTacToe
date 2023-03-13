@@ -1,20 +1,19 @@
 from ursina import Entity
-from ursina.shaders import basic_lighting_shader
+import config
 
 # All potential slots for players to set their corresponding symbols
 class Slots(Entity):
     def __init__(self, **kwargs):
         super().__init__()
-        self.model = 'sphere'
-        self.scale = 2.6
-        self.collider = 'sphere'
+        self.model = config.slotsModel
+        self.scale = config.slotsScale
+        self.collider = config.slotsCollider
 
         self.x = kwargs.pop('xpos')
         self.y = kwargs.pop('ypos')
         self.z = kwargs.pop('zpos')
-        # self.always_on_top = False
 
         self.parent = kwargs.pop("gameObj")
-        self.shader = basic_lighting_shader
-        # self.texture = 'horizontal_gradient'
+        self.shader = config.slotsShader
+        self.texture = config.slotsTexture
 

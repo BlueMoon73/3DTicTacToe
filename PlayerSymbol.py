@@ -1,5 +1,6 @@
-from ursina import Entity, color
-from ursina.shaders import colored_lights_shader
+from ursina import Entity
+
+import config
 
 
 # each symbol/gamepiece on the board
@@ -9,26 +10,25 @@ class PlayerSymbol(Entity):
         super().__init__()
         self.playerNum = kwargs.pop("player")
         if self.playerNum == 1:
-            self.model = 'assets/player symbols/diamond.obj'
-            self.texture = 'assets/player symbols/diamondTexture.png'
-            self.shader = colored_lights_shader
 
-            self.scale = 20
+            self.model = config.playerOneSymbolModel
+            self.texture = config.playerOneSymbolTexture
+            self.shader = config.playerOneSymbolShader
+            self.scale = config.playerOneSymbolScale
 
         elif self.playerNum == 2:
-            self.model = 'assets/player symbols/pyramid.obj'
+            self.model = config.playerTwoSymbolModel
+            self.texture = config.playerTwoSymbolTexture
+            self.shader = config.playerTwoSymbolShader
+            self.scale = config.playerTwoSymbolScale
+            self.color = config.playerTwoSymbolColor
 
-            self.color = color.hsv(330, .19, .71)
-            self.shader = colored_lights_shader
-
-            self.scale = .25
         elif self.playerNum == 3:
-            self.shader = colored_lights_shader
-            self.model = "cube"
-            self.color = color.hsv(119, .39, .92)
-
-            self.scale = 2.5
+            self.shader = config.playerThreeSymbolShader
+            self.model = config.playerThreeSymbolModel
+            # self.texture = config.playerThreeSymbolTexture
+            self.color = config.playerThreeSymbolColor
+            self.scale = config.playerThreeSymbolScale
 
         self.position = kwargs.pop("position")
         self.parent = kwargs.pop("parent")
-        self.multiplier = 2
