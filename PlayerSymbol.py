@@ -10,7 +10,6 @@ class PlayerSymbol(Entity):
         super().__init__()
         self.playerNum = kwargs.pop("player")
         if self.playerNum == 1:
-
             self.model = config.playerOneSymbolModel
             self.texture = config.playerOneSymbolTexture
             self.shader = config.playerOneSymbolShader
@@ -29,6 +28,8 @@ class PlayerSymbol(Entity):
             # self.texture = config.playerThreeSymbolTexture
             self.color = config.playerThreeSymbolColor
             self.scale = config.playerThreeSymbolScale
+        else:
+            pass
 
         self.position = kwargs.pop("position")
         self.parent = kwargs.pop("parent")

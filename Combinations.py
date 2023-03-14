@@ -1,6 +1,5 @@
 import config
 
-
 def allPossibleHorziontalCombos():
     # HORIZONTAL COMBOS
     for x in range(3):
@@ -30,7 +29,7 @@ def allPossibleHorziontalCombos():
             row = [slot1, slot2, slot3]
 
             config.horizontalCombos.append(row)
-
+    print(config.horizontalCombos)
 
 def allPossibleDiagonalMultilayeredCombos():
     for x in range(3):
@@ -70,7 +69,7 @@ def allPossibleCornerCombos():
 
     slot7 = [0, 2, 0]
     slot8 = [1, 1, 1]
-    slot9 = [0, 0, 0]
+    slot9 = [2, 0, 2]
     row = [slot7, slot8, slot9]
     config.cornerCombos.append(row)
 

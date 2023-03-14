@@ -46,6 +46,10 @@ playerThreeSymbolShader = colored_lights_shader
 playerThreeSymbolColor = color.hex("#74bd73")
 playerThreeSymbolScale = 1.2
 
+messageWordwrap = 15
+messageColorRed = color.hex("#8c261b")
+messageColorGreen = color.hex("#26694e")
+messageColorPurple = color.hex("#0b135c")
 
 toggleButtonDefaultColor = color.olive
 toggleButtonClickedColor = color.blue
