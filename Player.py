@@ -27,7 +27,7 @@ class Player(Entity):
                     hoverIndex = self.gameboard.hoverBoxIndex
                     if not config.slotsOccupied[hoverIndex] and not self.takeOverButton.value:
                         self.placePlayerSymbol(hoverIndex)
-                        self.msg.color = config.messageColorPurple # sets color to a light purple ish
+                        self.msg.color = config.messageColorPurple  # sets color to a light purple ish
                         self.msg.text = "Placed symbol successfully!"
                         self.msg.wordwrap = config.messageWordwrap
                         print(config.slotPos[hoverIndex])
@@ -54,7 +54,7 @@ class Player(Entity):
                         self.msg.color = config.messageColorRed
                         self.msg.text = "There is nothing in the spot to takeover! Please disable takeovers to place your " \
                                         "symbol"
-                        self.msg.wordwrap =config.messageWordwrap
+                        self.msg.wordwrap = config.messageWordwrap
                     elif config.slotsOccupied[hoverIndex] and not self.takeOverButton.value:
                         self.msg.color = config.messageColorRed
                         self.msg.text = "That spot is already taken! Please press the takeover button to use a " \
@@ -169,6 +169,7 @@ class Player(Entity):
         for i in range(len(config.slots)):
             if config.slots[i].position == pos:
                 return i
+
     def gameWin(self, winningPlayer, winningSlots):
         self.msg.text = "GAME OVER! Player " + str(winningPlayer) + " HAS WON!"
         self.msg.scale = 1.5

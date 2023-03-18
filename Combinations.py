@@ -1,5 +1,6 @@
 import config
 
+
 def allPossibleHorziontalCombos():
     # HORIZONTAL COMBOS
     for x in range(3):
@@ -30,6 +31,7 @@ def allPossibleHorziontalCombos():
 
             config.horizontalCombos.append(row)
     print(config.horizontalCombos)
+
 
 def allPossibleDiagonalMultilayeredCombos():
     for x in range(3):

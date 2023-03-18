@@ -9,7 +9,7 @@ import GameInit
 if __name__ == '__main__':
     app = Ursina()
 
-    takeOverButton = ToggleButton(startVal=False, pos=(-0.3, -.4), scale=(0.4, 0.1),
+    takeOverButton = ToggleButton(startVal=False, pos=(0.8, -.4), scale=(0.4, 0.1),
                                   defaultText="Click to  enable takeover mode!",
                                   clickText="Click to  disable takeover mode!")
 

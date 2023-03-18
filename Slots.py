@@ -1,6 +1,7 @@
 from ursina import Entity
 import config
 
+
 # All potential slots for players to set their corresponding symbols
 class Slots(Entity):
     def __init__(self, **kwargs):
@@ -16,4 +17,3 @@ class Slots(Entity):
         self.parent = kwargs.pop("gameObj")
         self.shader = config.slotsShader
         self.texture = config.slotsTexture
-
