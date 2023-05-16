@@ -92,15 +92,13 @@ class Player(Entity):
 
         for winSlot in winningSlots:
             indexOfWinningSlots.append(self.findSymbolIndexWithWorldPos(winSlot.position))
-            print("==============")
-        # print(indexOfWinningSlots)
         for index in indexOfWinningSlots:
             for winSlotIndex in range(len(winningSlots)):
                 if currentSlots[index] == winningSlots[winSlotIndex]:
                     matchingSlotIndexes.append(index)
                     matchingWinIndex.append(winSlotIndex)
                 else:
-                    return index, winSlotIndex
+                    return index, winSlotIndex # maube this needs ot be changed to matchingWinIndex
 
     def calculateIfNextMoveWin(self, index):
         p = PlayerSymbol(player=self.turnNum, position=config.slots[index].position, parent=self.gameboard)

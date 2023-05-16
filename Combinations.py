@@ -12,25 +12,21 @@ def allPossibleHorziontalCombos():
             row = [slot1, slot2, slot3]
 
             config.horizontalCombos.append(row)
-    for x in range(3):
-        for y in range(3):
-            slot1 = [x, 0, y]
-            slot2 = [x, 1, y]
-            slot3 = [x, 2, y]
+    for a in range(3):
+        for b in range(3):
+            slot1 = [a, 0, b]
+            slot2 = [a, 1, b]
+            slot3 = [a, 2, b]
 
             row = [slot1, slot2, slot3]
 
             config.horizontalCombos.append(row)
-    for x in range(3):
-        for y in range(3):
-            slot1 = [0, x, y]
-            slot2 = [1, x, y]
-            slot3 = [2, x, y]
+    for c in range(3):
+        for d in range(3):
+            slot1 = [0, c, d]
+            slot2 = [1, c, d]
+            slot3 = [2, c, d]
 
-            row = [slot1, slot2, slot3]
-
-            config.horizontalCombos.append(row)
-    print(config.horizontalCombos)
 
 
 def allPossibleDiagonalMultilayeredCombos():
@@ -75,11 +71,26 @@ def allPossibleCornerCombos():
     row = [slot7, slot8, slot9]
     config.cornerCombos.append(row)
 
+    slot16 = [0, 0, 2]
+    slot17 = [1, 1, 1]
+    slot18 = [2, 2, 0]
+    row = (slot16, slot17, slot18)
+    config.cornerCombos.append(row)
+
     slot10 = [2, 2, 0]
     slot11 = [1, 1, 1]
     slot12 = [0, 0, 2]
     row = (slot10, slot11, slot12)
     config.cornerCombos.append(row)
+
+    slot13 = [0, 2, 2]
+    slot14 = [1, 1, 1]
+    slot15 = [2, 0, 0]
+    row = (slot13, slot14, slot15)
+    config.cornerCombos.append(row)
+
+
+
 
 
 def makeWinningCombos():
