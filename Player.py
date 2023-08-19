@@ -10,6 +10,9 @@ class Player(Entity):
 
     def __init__(self, **kwargs):
         super().__init__()
+        self.rowNum = None
+        self.winningPattern = None
+        self.winType = None
         self.gameboard = kwargs.pop("gameboard")
         self.turnNum = 1
         self.playerOneTakeovers = Text(text="Player 1 Takeovers: " + str(config.takeovers[0]), wordwrap=30, x=0.5, y=.3)
@@ -19,6 +22,7 @@ class Player(Entity):
         self.playerTurn = Text(text="Player # " + str(self.turnNum), wordwrap=30, x=0.5, y=0)
         self.msg = Text(text=" ", wordwrap=config.messageWordwrap, x=0.5, y=-0.1, scale=1.4, color=color.green)
         self.takeOverButton = kwargs.pop("takeoverButton")
+        self.currentTurnLoc = None
 
     def input(self, keys):
         if keys == 'left mouse down':
@@ -69,6 +73,7 @@ class Player(Entity):
         p = PlayerSymbol(player=self.turnNum, position=config.slots[index].position, parent=self.gameboard)
         config.slotsOccupied[index] = True
         config.currentSymbols[index] = p
+
         self.turnNum += 1
         if self.turnNum > 3:
             self.turnNum = self.turnNum % 3
@@ -85,7 +90,7 @@ class Player(Entity):
         if self.turnNum > 3:
             self.turnNum = self.turnNum % 3
 
-    def findWinningSlotIndex(self, winningSlots, currentSlots, ):
+    def findWinningSlotIndex(self, winningSlots, currentSlots ):
         indexOfWinningSlots = []
         matchingSlotIndexes = []
         matchingWinIndex = []
@@ -126,6 +131,8 @@ class Player(Entity):
 
             if not (slotOneSymbol is None) and not (slotTwoSymbol is None) and not (slotThreeSymbol is None):
                 if slotOneSymbol.playerNum == slotTwoSymbol.playerNum == slotThreeSymbol.playerNum:
+                    self.winningPattern = ([[slotOneSymbol, slotTwoSymbol, slotThreeSymbol]])
+                    self.rowNum = row
                     return [slotOneSymbol, slotTwoSymbol, slotThreeSymbol]
 
     def checkForMultilayerWin(self, positions):
@@ -136,6 +143,8 @@ class Player(Entity):
 
             if not (slotOneSymbol is None) and not (slotTwoSymbol is None) and not (slotThreeSymbol is None):
                 if slotOneSymbol.playerNum == slotTwoSymbol.playerNum == slotThreeSymbol.playerNum:
+                    self.winningPattern = ([[slotOneSymbol, slotTwoSymbol, slotThreeSymbol]])
+                    self.rowNum = row
                     return [slotOneSymbol, slotTwoSymbol, slotThreeSymbol]
 
     def checkForCornerToCornerWin(self, positions):
@@ -145,6 +154,8 @@ class Player(Entity):
             slotThreeSymbol = positions[self.findSymbolIndexWithPos(config.cornerCombos[row][2])]
             if not (slotOneSymbol is None) and not (slotTwoSymbol is None) and not (slotThreeSymbol is None):
                 if slotOneSymbol.playerNum == slotTwoSymbol.playerNum == slotThreeSymbol.playerNum:
+                    self.winningPattern = ([[slotOneSymbol, slotTwoSymbol, slotThreeSymbol]])
+                    self.rowNum = row
                     return [slotOneSymbol, slotTwoSymbol, slotThreeSymbol]
 
     def checkForAnyWin(self, positions):
@@ -152,10 +163,13 @@ class Player(Entity):
         multilayerSlots = self.checkForMultilayerWin(positions)
         cornerSlots = self.checkForCornerToCornerWin(positions)
         if not horizontalSlots is None:
+            self.winType = "horizontalSlots"
             return horizontalSlots
         if not multilayerSlots is None:
+            self.winType = "multilayerSlots"
             return multilayerSlots
         if not cornerSlots is None:
+            self.winType = "cornerSlots"
             return cornerSlots
 
     def findSymbolIndexWithPos(self, pos):
@@ -169,8 +183,8 @@ class Player(Entity):
                 return i
 
     def gameWin(self, winningPlayer, winningSlots):
-        self.msg.text = "GAME OVER! Player " + str(winningPlayer) + " HAS WON!"
-        self.msg.scale = 1.5
+        self.msg.text = "Player " + str(winningPlayer) + " HAS WON! with a " + str(self.winType) + str(self.rowNum)
+        self.msg.scale = 1.0
         config.gameFinished = True
         for slot in winningSlots:
             slot.rotation_y += 5
