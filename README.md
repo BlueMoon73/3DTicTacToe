@@ -1,6 +1,5 @@
 # 3DTicTacToe
-3D version of Tic Tac Toe, meant for 3 players (technically also connect 3 :/) 
-
+3D version of Tic Tac Toe, meant for 3 players 
 
 ## Rules: 
 First one to connect 3 of their symbol, consectively, wins. 
