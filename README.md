@@ -1,9 +1,8 @@
----
 
 # 3D Tic Tac Toe  
 **A modern twist on the classic game, designed for 3 players in a 3D space.**
 
----
+----
 
 ## Overview  
 This is a 3D version of Tic Tac Toe where three players compete to connect three consecutive symbols in any direction (horizontal, vertical, or diagonal). The game introduces strategic mechanics like **takeovers**, adding an extra layer of depth and competition.
